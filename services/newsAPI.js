@@ -1,6 +1,6 @@
 // services/newsAPI.js
 export async function fetchNews() {
-    const apiKey = "e343a56a02b44d53b4fe51e236ea20b2"; 
+    const apiKey = process.env.NEXT_PUBLIC_NEWS_API_KEY;
     const url = `https://newsapi.org/v2/top-headlines?country=us&pageSize=10&apiKey=${apiKey}`;
   
     try {

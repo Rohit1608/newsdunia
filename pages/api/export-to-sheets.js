@@ -1,4 +1,5 @@
 import { google } from "googleapis";
+import os from "os";
 import path from "path";
 import { promises as fs } from "fs";
 
@@ -10,12 +11,15 @@ export default async function handler(req, res) {
   const { data, sheetId } = req.body;
 
   try {
-    const keyFile = path.join(process.cwd(), "credentials.json");
-    const keyFileContent = await fs.readFile(keyFile, "utf-8");
-    const credentials = JSON.parse(keyFileContent);
+    
+    const decoded = Buffer.from(process.env.GOOGLE_CREDENTIALS, "base64").toString("utf-8");
+    
+    
+    const tempPath = path.join(os.tmpdir(), "gcp-key.json");
+    await fs.writeFile(tempPath, decoded);
 
     const auth = new google.auth.GoogleAuth({
-      credentials,
+      keyFile: tempPath,
       scopes: ["https://www.googleapis.com/auth/spreadsheets"],
     });
 
@@ -40,7 +44,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ message: "Exported to Google Sheets!" });
   } catch (err) {
-    console.error("Error:", err.message);
+    console.error("Google Sheets API error:", err.message);
     return res.status(500).json({ error: err.message });
   }
 }
